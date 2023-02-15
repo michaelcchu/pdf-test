@@ -28,7 +28,7 @@ loadingTask.promise.then(function(pdf) {
 
     renderingTask.promise.then(function() {    
         const cursor = createCursor();
-        showImageData(cursor);
+        showHorizontalLines();
     });
   });
 });
@@ -61,32 +61,35 @@ function createCursor() {
     return cursor;
 }
 
-lines = [];
-
-function showImageData(cursor) {
+function showHorizontalLines() {
     const imgData = context.getImageData(0, 0, canvas.width, canvas.height);
     const data = imgData.data;
+    const lines = [];
 
-    let i = 0;
     let line = [];
-    while (4*i < data.length) {
+    for (let i = 0; 4*i < data.length; i++) {
         if ((data[4*i] !== 255) || 
         (data[4*i+1] !== 255) || 
         (data[4*i+2] !== 255)) {
             line.push(i);
-
-            data[4*i] = 0
-            data[4*i+1] = 255;
-            data[4*i+2] = 0;  
         } else {
             if (line.length) {
                 lines.push(line);
                 line = [];
             }
         }
-        i += 1;
-
     }
+
+    for (line of lines) {
+        if (line.length >= 100) {
+            for (i of line) {
+                data[4*i] = 0
+                data[4*i+1] = 255;
+                data[4*i+2] = 0;  
+            }
+        }
+    }
+
     console.log(lines);
     context.putImageData(imgData, 0, 0);
 }
