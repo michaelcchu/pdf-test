@@ -1,3 +1,9 @@
+let i = 0;
+let count = 0;
+let whiteCount = 0;
+const canvas = document.getElementById('layer1');
+const context = canvas.getContext('2d', {willReadFrequently: true});
+
 var loadingTask = pdfjsLib.getDocument('IMSLP23765-PMLP01595-Beethoven_Symphony6_Cls.pdf');
 loadingTask.promise.then(function(pdf) {
   // you can now use *pdf* here
@@ -7,9 +13,6 @@ loadingTask.promise.then(function(pdf) {
     var viewport = page.getViewport({ scale: scale, });
     // Support HiDPI-screens.
     var outputScale = window.devicePixelRatio || 1;
-
-    var canvas = document.getElementById('layer1');
-    var context = canvas.getContext('2d');
 
     canvas.width = Math.floor(viewport.width * outputScale);
     canvas.height = Math.floor(viewport.height * outputScale);
@@ -85,21 +88,13 @@ function createCursor() {
     return cursor;
 }
 
-let i = 0;
-let count = 0;
-let whiteCount = 0;
-
 function showImageData(cursor) {
-    const canvas = document.getElementById('layer1');
-    const context = canvas.getContext('2d');
-
     const imgData = context.getImageData(0, 0, canvas.width, canvas.height);
     const data = imgData.data;
-    console.log(imgData);
 
     i += 1;
-
-    while (4*i < data.length) {
+    let foundNonWhite = false;
+    while ((4*i < data.length) && !foundNonWhite) {
         const red = data[4*i];
         const green = data[4*i + 1];
         const blue = data[4*i + 2];
@@ -117,12 +112,15 @@ function showImageData(cursor) {
             cursor.x = column;
             cursor.update();
 
-            break;
+            foundNonWhite = true;
         } else {
             whiteCount += 1;
+            i += 1;
         }
-        i += 1;
     }
+}
+
+function displayData() {
     const totalPixels = count + whiteCount;
     console.log(count, count / totalPixels);
     console.log(whiteCount, whiteCount / totalPixels);
