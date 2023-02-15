@@ -63,28 +63,6 @@ function createCursor() {
     
     const cursor = new component(0, 0, 10, 50, "red");
     cursor.update();
-    
-    document.addEventListener("keydown", (e) => {
-        e.preventDefault();
-        if (e.key === "ArrowRight") {
-            cursor.clear();
-            cursor.x += 10;
-            cursor.update();
-        } else if (e.key === "ArrowLeft") {
-            cursor.clear();
-            cursor.x -= 10;
-            cursor.update();
-        } else if (e.key === "ArrowDown") {
-            cursor.clear();
-            cursor.y += 10;
-            cursor.update();
-        } else if (e.key === "ArrowUp") {
-            cursor.clear();
-            cursor.y -= 10;
-            cursor.update();
-        }
-    });
-
     return cursor;
 }
 
