@@ -26,18 +26,26 @@ loadingTask.promise.then(function(pdf) {
 
     var renderingTask = page.render(renderContext);
 
-    renderingTask.promise.then(function() {    
+    renderingTask.promise.then(function() {
+        initializeCanvases(); 
         const cursor = createCursor();
-        showHorizontalLines();
+        const lines = getHorizontalLines();
+        console.log(lines);
+        drawLines(lines);
     });
   });
 });
 
+function initializeCanvases() {
+    for (let i=2; i<=4; i++) {
+        const canvas = document.getElementById('layer'+i);
+        canvas.width = document.getElementById('layer1').width;
+        canvas.height = document.getElementById('layer1').height;
+    }
+}
+
 function createCursor() {
     const canvas = document.getElementById('layer2');
-    canvas.width = document.getElementById('layer1').width;
-    canvas.height = document.getElementById('layer1').height;
-
     const context = canvas.getContext('2d');
     context.globalAlpha = 0.5;
     
@@ -61,7 +69,10 @@ function createCursor() {
     return cursor;
 }
 
-function showHorizontalLines() {
+function getHorizontalLines() {
+    const canvas = document.getElementById('layer1');
+    const context = canvas.getContext('2d', {willReadFrequently: true});
+
     const imgData = context.getImageData(0, 0, canvas.width, canvas.height);
     const data = imgData.data;
     const lines = [];
@@ -80,16 +91,26 @@ function showHorizontalLines() {
         }
     }
 
+    return lines;
+}
+
+function drawLines(lines) {
+    const canvas = document.getElementById('layer3');
+    const context = canvas.getContext('2d', {willReadFrequently: true});
+
+    const imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imgData.data;
+
     for (line of lines) {
         if (line.length >= 100) {
             for (i of line) {
-                data[4*i] = 0
+                data[4*i] = 0;
                 data[4*i+1] = 255;
-                data[4*i+2] = 0;  
+                data[4*i+2] = 0;
+                data[4*i+3] = 127;
             }
         }
     }
-
-    console.log(lines);
+    
     context.putImageData(imgData, 0, 0);
 }
