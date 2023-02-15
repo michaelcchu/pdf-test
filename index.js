@@ -28,7 +28,9 @@ loadingTask.promise.then(function(pdf) {
 
     renderingTask.promise.then(function() {    
         const cursor = createCursor();
-        showImageData(cursor);
+        document.addEventListener("keydown", () => {
+            showImageData(cursor);
+        });
     });
   });
 });
@@ -41,11 +43,11 @@ function createCursor() {
     const context = canvas.getContext('2d');
     context.globalAlpha = 0.5;
     
-    function component(width, height, x, y, color) {
-        this.width = width;
-        this.height = height;
+    function component(x, y, width, height, color) {
         this.x = x;
         this.y = y;
+        this.width = width;
+        this.height = height;
         this.color = color;
         this.clear = function() {
             context.clearRect(this.x, this.y, this.width, this.height);
@@ -56,7 +58,7 @@ function createCursor() {
         };
     }
     
-    const cursor = new component(10, 50, 50, 50, "red");
+    const cursor = new component(0, 0, 10, 50, "red");
     cursor.update();
     
     document.addEventListener("keydown", (e) => {
@@ -83,6 +85,10 @@ function createCursor() {
     return cursor;
 }
 
+let i = 0;
+let count = 0;
+let whiteCount = 0;
+
 function showImageData(cursor) {
     const canvas = document.getElementById('layer1');
     const context = canvas.getContext('2d');
@@ -91,9 +97,8 @@ function showImageData(cursor) {
     const data = imgData.data;
     console.log(imgData);
 
-    let i = 0;
-    let count = 0;
-    let whiteCount = 0;
+    i += 1;
+
     while (4*i < data.length) {
         const red = data[4*i];
         const green = data[4*i + 1];
@@ -104,7 +109,7 @@ function showImageData(cursor) {
             (data[4*i+1] !== 255) || 
             (data[4*i+2] !== 255)) {
             count += 1;
-            row = i / canvas.width;
+            row = Math.floor(i / canvas.width);
             column = i % canvas.width;
 
             cursor.clear();
@@ -118,34 +123,8 @@ function showImageData(cursor) {
         }
         i += 1;
     }
-    const totalPixels = count+whiteCount;
+    const totalPixels = count + whiteCount;
     console.log(count, count / totalPixels);
     console.log(whiteCount, whiteCount / totalPixels);
     console.log(totalPixels);
 }
-
-let i = 0;
-
-function advanceOnePixel() {
-    const canvas = document.getElementById('layer1');
-    const context = canvas.getContext('2d');
-
-    const imgData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imgData.data;
-    
-    if (i < data.length) {
-        const red = data[i];
-        const green = data[i + 1];
-        const blue = data[i + 2];
-        const alpha = data[i + 3];
-    
-        data[i] = 0
-        data[i+1] = 255;
-        data[i+2] = 0;
-
-        context.putImageData(imgData, 0, 0);
-        i += 4;
-    }
-}
-
-document.addEventListener("keydown", advanceOnePixel);
