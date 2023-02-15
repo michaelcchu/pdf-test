@@ -1,6 +1,3 @@
-let i = 0;
-let count = 0;
-let whiteCount = 0;
 const canvas = document.getElementById('layer1');
 const context = canvas.getContext('2d', {willReadFrequently: true});
 
@@ -31,9 +28,7 @@ loadingTask.promise.then(function(pdf) {
 
     renderingTask.promise.then(function() {    
         const cursor = createCursor();
-        document.addEventListener("keydown", () => {
-            showImageData(cursor);
-        });
+        showImageData(cursor);
     });
   });
 });
@@ -66,41 +61,32 @@ function createCursor() {
     return cursor;
 }
 
+lines = [];
+
 function showImageData(cursor) {
     const imgData = context.getImageData(0, 0, canvas.width, canvas.height);
     const data = imgData.data;
 
-    i += 1;
-    let foundNonWhite = false;
-    while ((4*i < data.length) && !foundNonWhite) {
-        const red = data[4*i];
-        const green = data[4*i + 1];
-        const blue = data[4*i + 2];
-        const alpha = data[4*i + 3];
-    
+    let i = 0;
+    let line = [];
+    while (4*i < data.length) {
         if ((data[4*i] !== 255) || 
-            (data[4*i+1] !== 255) || 
-            (data[4*i+2] !== 255)) {
-            count += 1;
-            row = Math.floor(i / canvas.width);
-            column = i % canvas.width;
+        (data[4*i+1] !== 255) || 
+        (data[4*i+2] !== 255)) {
+            line.push(i);
 
-            cursor.clear();
-            cursor.y = row;
-            cursor.x = column;
-            cursor.update();
-
-            foundNonWhite = true;
+            data[4*i] = 0
+            data[4*i+1] = 255;
+            data[4*i+2] = 0;  
         } else {
-            whiteCount += 1;
-            i += 1;
+            if (line.length) {
+                lines.push(line);
+                line = [];
+            }
         }
-    }
-}
+        i += 1;
 
-function displayData() {
-    const totalPixels = count + whiteCount;
-    console.log(count, count / totalPixels);
-    console.log(whiteCount, whiteCount / totalPixels);
-    console.log(totalPixels);
+    }
+    console.log(lines);
+    context.putImageData(imgData, 0, 0);
 }
